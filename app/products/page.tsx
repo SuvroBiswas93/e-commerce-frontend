@@ -74,11 +74,11 @@ function ProductsContent() {
       </div>
 
       <div className="grid grid-cols-[270px_1fr] max-lg:grid-cols-1 gap-8 max-lg:gap-0">
-        <aside>
+        <div>
           {data?.categories && data.categories.length > 0 && (
             <ProductFilters categories={data.categories} />
           )}
-        </aside>
+        </div>
 
         <main className="min-h-[400px]">
           {error ? (

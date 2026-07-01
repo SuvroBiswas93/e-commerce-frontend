@@ -69,7 +69,7 @@ export default function HomePage() {
         <Container>
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold tracking-tight mb-4">Why Shop With Us</h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Experience shopping the way it was meant to be—effortless, secure, and lightning fast.</p>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Experience shopping the way it was meant to be-effortless, secure, and lightning fast.</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">

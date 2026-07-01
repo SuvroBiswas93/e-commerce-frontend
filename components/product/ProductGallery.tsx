@@ -12,10 +12,10 @@ export default function ProductGallery({ image, name }: ProductGalleryProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   return (
-    <div className="sticky top-24">
-      <div className="relative w-full aspect-square bg-gradient-to-br from-blue-50 to-slate-100 border border-blue-100 rounded-2xl overflow-hidden shadow-sm">
+    <div className="sticky top-24 max-md:static">
+      <div className="relative w-full aspect-square bg-gradient-to-br from-muted/80 to-muted/60 border border-border/60 rounded-2xl overflow-hidden shadow-sm max-md:aspect-[4/3] max-sm:aspect-square">
         {isLoading && (
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-slate-100 animate-pulse" />
+          <div className="absolute inset-0 bg-muted animate-pulse" />
         )}
         <Image
           src={image}

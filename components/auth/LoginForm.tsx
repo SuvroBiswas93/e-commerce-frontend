@@ -39,13 +39,13 @@ export default function LoginForm() {
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="relative overflow-hidden bg-card border border-border/50 rounded-3xl shadow-xl shadow-primary/5">
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary/40 via-primary to-primary/40" />
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/3 rounded-full blur-3xl" />
         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-primary/3 rounded-full blur-3xl" />
 
         <div className="relative p-8 max-md:p-6">
           <div className="flex flex-col items-center mb-8">
-            <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 text-primary mb-5 ring-1 ring-primary/10">
+            <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-linear-to-br from-primary/10 to-primary/5 text-primary mb-5 ring-1 ring-primary/10">
               <Store className="w-7 h-7" />
             </div>
             <h1 className="text-2xl font-bold text-foreground tracking-tight">Welcome back</h1>
