@@ -1,0 +1,6 @@
+allowBuilds:
+  '@parcel/watcher': true
+  msw: true
+  sharp: true
+fetchTimeout: 120000
+minimumReleaseAge: 0
