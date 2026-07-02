@@ -10,7 +10,7 @@ export default function CartBadge() {
 
   return (
     <span
-      className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shadow-sm shadow-primary/30"
+      className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-4.5 h-4.5 flex items-center justify-center px-1 shadow-sm shadow-primary/30"
       aria-label={`Cart has ${total} items`}
     >
       {total > 99 ? '99+' : total}

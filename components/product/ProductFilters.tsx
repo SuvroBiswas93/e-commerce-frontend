@@ -77,7 +77,7 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
         </span>
         <span className="flex items-center gap-2.5">
           {hasFilters && (
-            <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+            <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full min-w-5 text-center">
               {filterCount}
             </span>
           )}
@@ -100,7 +100,7 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
       {/* Filter panel */}
       <aside
         className={`flex flex-col gap-5 rounded-2xl border border-border bg-card p-5 text-foreground shadow-sm sticky top-24
-          max-lg:fixed max-lg:top-0 max-lg:left-0 max-lg:h-full max-lg:w-[300px] max-lg:max-w-[85vw]
+          max-lg:fixed max-lg:top-0 max-lg:left-0 max-lg:h-full max-lg:w-75 max-lg:max-w-[85vw]
           max-lg:z-50 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-0 max-lg:pt-16 max-lg:px-6 max-lg:pb-6
           max-lg:transition-transform max-lg:duration-300 max-lg:ease-in-out
           ${isOpen ? 'max-lg:translate-x-0' : 'max-lg:-translate-x-full'}
@@ -212,7 +212,7 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
                 min="0"
               />
             </div>
-            <span className="text-muted-foreground/30 font-medium text-sm flex-shrink-0">-</span>
+            <span className="text-muted-foreground/30 font-medium text-sm shrink-0">-</span>
             <div className="flex-1">
               <input
                 type="number"

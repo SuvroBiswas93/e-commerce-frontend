@@ -55,7 +55,7 @@ export default function Header() {
         <>
           <div className={`${baseClass} bg-muted/80 rounded-lg text-foreground/80`}>
             <User className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate max-w-[120px]">{user.name}</span>
+            <span className="truncate max-w-30">{user.name}</span>
           </div>
           <button
             onClick={handleLogout}

@@ -131,7 +131,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
               }}
               min="1"
               max={product.stock}
-              className="flex-1 text-center border-none bg-none text-foreground font-semibold px-2 w-16 text-base max-sm:text-sm focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&[type=number]]:appearance-none"
+              className="flex-1 text-center border-none bg-none text-foreground font-semibold px-2 w-16 text-base max-sm:text-sm focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [[type=number]]:appearance-none"
               aria-label="Product quantity"
             />
             <button

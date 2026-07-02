@@ -13,7 +13,7 @@ export default function ProductGallery({ image, name }: ProductGalleryProps) {
 
   return (
     <div className="sticky top-24 max-md:static">
-      <div className="relative w-full aspect-square bg-gradient-to-br from-muted/80 to-muted/60 border border-border/60 rounded-2xl overflow-hidden shadow-sm max-md:aspect-[4/3] max-sm:aspect-square">
+      <div className="relative w-full aspect-square bg-linear-to-br from-muted/80 to-muted/60 border border-border/60 rounded-2xl overflow-hidden shadow-sm max-md:aspect-4/3 max-sm:aspect-square">
         {isLoading && (
           <div className="absolute inset-0 bg-muted animate-pulse" />
         )}

@@ -52,7 +52,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
     products = productResult.data;
     meta = productResult.meta || { page: params.page, limit: params.limit, total: 0, hasMore: false };
-    categories = Array.isArray(cats) ? cats : cats.data || [];
+    categories = cats;
   } catch {
     error = true;
   }
@@ -75,7 +75,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </Suspense>
         </div>
 
-        <main className="min-h-[400px]">
+        <main className="min-h-100">
           <Suspense fallback={<Skeleton variant="card" count={12} />}>
             {error ? (
               <div className="flex flex-col items-center justify-center py-20">

@@ -149,7 +149,7 @@ export default function InfiniteProducts({
       <ProductGrid products={products} />
 
       {meta.hasMore && (
-        <div ref={sentinelRef} className="mt-8 flex justify-center min-h-[1px]">
+        <div ref={sentinelRef} className="mt-8 flex justify-center min-h-px">
           {isLoading && <Loader />}
         </div>
       )}

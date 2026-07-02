@@ -33,7 +33,7 @@ export default function CartItem({ item }: CartItemProps) {
   return (
     <div className="relative grid grid-cols-[100px_1fr_auto] gap-4 p-4 bg-card border border-border/60 rounded-2xl transition-all hover:shadow-sm hover:border-border/80 max-md:grid-cols-[80px_1fr] max-md:gap-3 max-md:p-3">
       <Link href={`/products/${item.productId}`} className="no-underline">
-        <div className="relative w-[100px] h-[100px] overflow-hidden rounded-xl bg-muted/60 max-md:w-20 max-md:h-20">
+        <div className="relative w-25 h-25 overflow-hidden rounded-xl bg-muted/60 max-md:w-20 max-md:h-20">
           <Image
             src={item.image}
             alt={item.name}
@@ -73,7 +73,7 @@ export default function CartItem({ item }: CartItemProps) {
                   updateQuantity(item.productId, val);
                 }
               }}
-              className="w-10 text-center border-none bg-none text-foreground font-semibold text-xs focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&[type=number]]:appearance-none"
+              className="w-10 text-center border-none bg-none text-foreground font-semibold text-xs focus:outline-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [[type=number]]:appearance-none"
               aria-label={`Quantity for ${item.name}`}
             />
             <button

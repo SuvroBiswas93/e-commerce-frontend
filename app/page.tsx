@@ -7,10 +7,10 @@ export default function HomePage() {
   return (
     <div className="relative overflow-hidden bg-background">
       {/* Background Decor */}
-      <div className="absolute top-0 inset-x-0 h-[800px] pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-background to-background" />
-        <div className="absolute -top-[300px] -right-[200px] w-[800px] h-[800px] rounded-full bg-primary/20 blur-[120px] animate-float opacity-50" />
-        <div className="absolute top-[200px] -left-[200px] w-[600px] h-[600px] rounded-full bg-secondary/20 blur-[120px] animate-float-delayed opacity-50" />
+      <div className="absolute top-0 inset-x-0 h-200 pointer-events-none">
+        <div className="absolute inset-0 bg-linear-to-b from-primary/10 via-background to-background" />
+        <div className="absolute -top-75 -right-50 w-200 h-200 rounded-full bg-primary/20 blur-[120px] animate-float opacity-50" />
+        <div className="absolute top-50 -left-50 w-150 h-150 rounded-full bg-secondary/20 blur-[120px] animate-float-delayed opacity-50" />
       </div>
 
       {/* Hero Section */}
@@ -34,7 +34,7 @@ export default function HomePage() {
                   href="/products"
                   className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 bg-foreground text-background font-medium rounded-full overflow-hidden transition-transform hover:scale-105 active:scale-95"
                 >
-                  <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-primary/80 to-secondary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <span className="absolute inset-0 w-full h-full bg-linear-to-r from-primary/80 to-secondary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <span className="relative z-10 flex items-center gap-2">
                     Explore Collection
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -50,8 +50,8 @@ export default function HomePage() {
             </div>
 
             {/* Hero Image / Visual */}
-            <div className="relative z-10 lg:h-[600px] w-full max-lg:h-[400px] rounded-3xl overflow-hidden shadow-2xl border border-white/10 group">
-              <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent mix-blend-overlay z-10" />
+            <div className="relative z-10 lg:h-150 w-full max-lg:h-100 rounded-3xl overflow-hidden shadow-2xl border border-white/10 group">
+              <div className="absolute inset-0 bg-linear-to-tr from-primary/20 to-transparent mix-blend-overlay z-10" />
               <Image 
                 src="/images/hero2.png" 
                 alt="Premium Products Showcase" 
@@ -120,7 +120,7 @@ export default function HomePage() {
               <Link
                 key={cat.id}
                 href={`/products?category=${cat.id}`}
-                className="group relative h-[400px] rounded-3xl overflow-hidden block border border-border shadow-md"
+                className="group relative h-100 rounded-3xl overflow-hidden block border border-border shadow-md"
               >
                 <Image 
                   src={cat.img} 
@@ -128,7 +128,7 @@ export default function HomePage() {
                   fill 
                   className="object-cover group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
                 <div className="absolute bottom-0 left-0 p-8 w-full">
                   <div className="flex items-center justify-between">
                     <span className="text-white font-bold text-2xl translate-y-2 group-hover:translate-y-0 transition-transform">{cat.label}</span>
@@ -164,7 +164,7 @@ export default function HomePage() {
                 href="/products"
                 className="group relative inline-flex items-center justify-center gap-2 px-10 py-5 bg-background text-foreground font-bold rounded-full overflow-hidden transition-transform hover:scale-105 active:scale-95 shadow-xl shadow-background/20"
               >
-                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <span className="absolute inset-0 w-full h-full bg-linear-to-r from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <span className="relative z-10 flex items-center gap-3">
                   Start Exploring Now
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

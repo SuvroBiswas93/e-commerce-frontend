@@ -95,7 +95,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           Products
         </Link>
         <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-foreground/60 font-medium truncate min-w-0 max-w-[200px] max-sm:max-w-[120px]">
+        <span className="text-foreground/60 font-medium truncate min-w-0 max-w-50 max-sm:max-w-30">
           {product.title}
         </span>
       </nav>
