@@ -1,42 +1,53 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { productApi } from '@/lib/api';
-import { Product } from '@/types/index';
+import type { Metadata } from 'next';
+import type { Product } from '@/types/index';
 import Container from '@/components/layout/Container';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductInfo from '@/components/product/ProductInfo';
-import Skeleton from '@/components/common/Skeleton';
-import { ChevronRight, Home } from 'lucide-react';
+import { productApi } from '@/lib/api';
+import { ChevronRight, Home, ArrowLeft } from 'lucide-react';
 
-export default function ProductDetailPage() {
-  const params = useParams<{ id: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+export const revalidate = 3600;
 
-  useEffect(() => {
-    if (!params?.id) return;
-    setLoading(true);
-    setError(false);
-    productApi
-      .getProductById(params.id)
-      .then(setProduct)
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
-  }, [params?.id]);
+interface ProductDetailPageProps {
+  params: Promise<{ id: string }>;
+}
 
-  if (loading) {
-    return (
-      <Container className="py-8 max-md:py-5">
-        <Skeleton variant="detail" />
-      </Container>
-    );
+export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+
+  try {
+    const product = await productApi.getProductById(id);
+    return {
+      title: product.title,
+      description: product.description?.slice(0, 160),
+      openGraph: {
+        title: product.title,
+        description: product.description?.slice(0, 160),
+        images: product.thumbnail ? [{ url: product.thumbnail }] : [],
+      },
+    };
+  } catch {
+    return {
+      title: 'Product Not Found',
+      description: 'The requested product could not be found.',
+    };
+  }
+}
+
+export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
+  const { id } = await params;
+
+  let product: Product | null = null;
+  let error = false;
+
+  try {
+    product = await productApi.getProductById(id);
+  } catch {
+    error = true;
   }
 
-  if (error || !product) {
+  if (!product || error) {
     return (
       <Container className="py-8 max-md:py-5">
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
@@ -62,6 +73,13 @@ export default function ProductDetailPage() {
 
   return (
     <Container className="py-8 max-md:py-5">
+      <Link
+        href="/products"
+        className="inline-flex items-center gap-1.5 mb-2 text-sm text-muted-foreground/70 hover:text-primary transition-colors no-underline"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to Products
+      </Link>
       <nav className="flex items-center gap-1.5 mb-6 max-md:mb-4 text-sm text-muted-foreground/70 flex-wrap">
         <Link
           href="/"

@@ -8,24 +8,6 @@ export interface User {
   updatedAt: string;
 }
 
-export interface AuthResponse {
-  user: User;
-  token: string;
-  refreshToken?: string;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword?: string;
-}
-
 // Product Types
 export interface Product {
   id: string;
@@ -50,19 +32,17 @@ export interface Category {
   updatedAt?: string;
 }
 
-export interface PaginationMeta {
-  page: number;
-  limit: number;
-  total: number;
-  hasMore: boolean;
-}
-
 export interface ApiResponse<T> {
   success: boolean;
   statusCode: number;
   message: string;
   data: T;
-  meta?: PaginationMeta;
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+    hasMore: boolean;
+  };
 }
 
 // Cart Types
@@ -80,8 +60,6 @@ export interface CartState {
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
-  getTotalItems: () => number;
-  getSubtotal: () => number;
 }
 
 // Auth Store Types
@@ -96,17 +74,6 @@ export interface AuthState {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   clearError: () => void;
-}
-
-// Filter Types
-export interface ProductFilters {
-  search?: string;
-  category?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  sort?: SortOption;
-  page?: number;
-  limit?: number;
 }
 
 // Sorting Types

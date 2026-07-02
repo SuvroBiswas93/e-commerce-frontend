@@ -2,10 +2,19 @@ import { ApiResponse, Product, Category } from '@/types/index';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// Get token from localStorage (client-side only)
+// Server-side token holder (injected during SSR for authenticated requests)
+let __serverToken: string | null = null;
+
+export function setServerToken(token: string | null): void {
+  __serverToken = token;
+}
+
+// Get token from localStorage (client-side) or injected server token (SSR)
 function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('authToken');
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('authToken');
+  }
+  return __serverToken;
 }
 
 // Set token in localStorage
@@ -18,6 +27,7 @@ function setToken(token: string): void {
 function clearTokenAndRedirect(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem('authToken');
+  document.cookie = 'authToken=; path=/; max-age=0';
   window.location.href = '/auth/login';
 }
 
@@ -25,7 +35,7 @@ interface FetchOptions extends RequestInit {
   includeAuth?: boolean;
 }
 
-export async function apiFetch<T>(
+async function apiFetch<T>(
   endpoint: string,
   options: FetchOptions = {}
 ): Promise<T> {
@@ -100,6 +110,7 @@ export const authApi = {
   logout: () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('authToken');
+      document.cookie = 'authToken=; path=/; max-age=0';
     }
   },
 

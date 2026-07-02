@@ -1,66 +1,61 @@
-'use client';
-
-import { Suspense, useEffect, useState, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { productApi } from '@/lib/api';
+import { Suspense } from 'react';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import type { Metadata } from 'next';
 import Container from '@/components/layout/Container';
 import ProductFilters from '@/components/product/ProductFilters';
 import InfiniteProducts from '@/components/product/InfiniteProducts';
 import Skeleton from '@/components/common/Skeleton';
+import { productApi, setServerToken } from '@/lib/api';
 
-function ProductsContent() {
-  const searchParams = useSearchParams();
-  const [data, setData] = useState<{
-    products: any[];
-    meta: any;
-    categories: any[];
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const metadata: Metadata = {
+  title: 'Browse Products',
+  description: 'Browse our extensive collection of products with advanced filtering and search capabilities.',
+  openGraph: {
+    title: 'Browse Products',
+    description: 'Browse our extensive collection of products with advanced filtering and search capabilities.',
+  },
+};
 
-  const paramsStr = searchParams.toString();
+interface ProductsPageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const sp = new URLSearchParams(paramsStr);
-      const params: Record<string, any> = {
-        page: sp.get('page') ? parseInt(sp.get('page')!) : 1,
-        limit: 12,
-      };
+export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+  const sp = await searchParams;
 
-      if (sp.get('search')) params.search = sp.get('search');
-      if (sp.get('category')) params.category = sp.get('category');
-      if (sp.get('minPrice')) params.minPrice = sp.get('minPrice');
-      if (sp.get('maxPrice')) params.maxPrice = sp.get('maxPrice');
-      if (sp.get('sort')) params.sort = sp.get('sort');
+  const cookieStore = await cookies();
+  const token = cookieStore.get('authToken')?.value;
+  if (!token) redirect('/auth/login');
+  setServerToken(token);
 
-      const [productResult, categories] = await Promise.all([
-        productApi.getProducts(params),
-        productApi.getCategories(),
-      ]);
+  const params: Record<string, any> = {
+    page: sp.page ? parseInt(String(sp.page)) : 1,
+    limit: 12,
+  };
+  if (sp.search) params.search = String(sp.search);
+  if (sp.category) params.category = String(sp.category);
+  if (sp.minPrice) params.minPrice = String(sp.minPrice);
+  if (sp.maxPrice) params.maxPrice = String(sp.maxPrice);
+  if (sp.sort) params.sort = String(sp.sort);
 
-      setData({
-        products: productResult.data,
-        meta: productResult.meta || {
-          page: params.page,
-          limit: params.limit,
-          total: 0,
-          hasMore: false,
-        },
-        categories,
-      });
-    } catch (err) {
-      setError('Failed to load products');
-    } finally {
-      setLoading(false);
-    }
-  }, [paramsStr]);
+  let products: any[] = [];
+  let meta = { page: 1, limit: 12, total: 0, hasMore: false };
+  let categories: any[] = [];
+  let error = false;
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  try {
+    const [productResult, cats] = await Promise.all([
+      productApi.getProducts(params),
+      productApi.getCategories(),
+    ]);
+
+    products = productResult.data;
+    meta = productResult.meta || { page: params.page, limit: params.limit, total: 0, hasMore: false };
+    categories = Array.isArray(cats) ? cats : cats.data || [];
+  } catch {
+    error = true;
+  }
 
   return (
     <Container className="py-8 max-md:py-5">
@@ -75,34 +70,26 @@ function ProductsContent() {
 
       <div className="grid grid-cols-[270px_1fr] max-lg:grid-cols-1 gap-8 max-lg:gap-0">
         <div>
-          {data?.categories && data.categories.length > 0 && (
-            <ProductFilters categories={data.categories} />
-          )}
+          <Suspense fallback={<div className="rounded-2xl border border-border bg-card p-5 animate-pulse"><div className="h-6 bg-muted rounded w-20 mb-4" /><div className="space-y-3"><div className="h-10 bg-muted rounded" /><div className="h-10 bg-muted rounded" /><div className="h-10 bg-muted rounded" /></div></div>}>
+            {categories.length > 0 && <ProductFilters categories={categories} />}
+          </Suspense>
         </div>
 
         <main className="min-h-[400px]">
-          {error ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <p className="text-destructive font-medium">{error}</p>
-            </div>
-          ) : loading ? (
-            <Skeleton variant="card" count={12} />
-          ) : data ? (
-            <InfiniteProducts
-              initialProducts={data.products}
-              initialMeta={data.meta}
-            />
-          ) : null}
+          <Suspense fallback={<Skeleton variant="card" count={12} />}>
+            {error ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <p className="text-destructive font-medium">Failed to load products</p>
+              </div>
+            ) : (
+              <InfiniteProducts
+                initialProducts={products}
+                initialMeta={meta}
+              />
+            )}
+          </Suspense>
         </main>
       </div>
     </Container>
-  );
-}
-
-export default function ProductsPage() {
-  return (
-    <Suspense fallback={<Container className="py-8 max-md:py-5"><Skeleton variant="card" count={12} /></Container>}>
-      <ProductsContent />
-    </Suspense>
   );
 }

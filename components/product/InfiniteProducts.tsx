@@ -33,32 +33,72 @@ export default function InfiniteProducts({
   const [error, setError] = useState('');
   const metaRef = useRef(meta);
   metaRef.current = meta;
+  const isFirstRender = useRef(true);
 
-  // Reset products when search params change
+  const buildParams = useCallback(
+    (page: number) => {
+      const sp = new URLSearchParams(paramsStr);
+      const params: Record<string, any> = {
+        page,
+        limit: 12,
+      };
+      if (sp.get('search')) params.search = sp.get('search');
+      if (sp.get('category')) params.category = sp.get('category');
+      if (sp.get('minPrice')) params.minPrice = sp.get('minPrice');
+      if (sp.get('maxPrice')) params.maxPrice = sp.get('maxPrice');
+      if (sp.get('sort')) params.sort = sp.get('sort');
+      return params;
+    },
+    [paramsStr]
+  );
+
+  // Fetch products when URL params change on client navigation
   useEffect(() => {
-    setProducts(initialProducts);
-    setMeta(initialMeta);
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    setIsLoading(true);
     setError('');
-  }, [paramsStr, initialProducts, initialMeta]);
+
+    productApi
+      .getProducts(buildParams(1))
+      .then((result) => {
+        setProducts(result.data);
+        setMeta(
+          result.meta || { page: 1, limit: 12, total: 0, hasMore: false }
+        );
+      })
+      .catch(() => setError('Failed to load products'))
+      .finally(() => setIsLoading(false));
+  }, [paramsStr, buildParams]);
+
+  // Fetch initial data on mount if SSR didn't provide it
+  useEffect(() => {
+    if (initialProducts.length === 0) {
+      setIsLoading(true);
+      productApi
+        .getProducts(buildParams(1))
+        .then((result) => {
+          setProducts(result.data);
+          setMeta(
+            result.meta || { page: 1, limit: 12, total: 0, hasMore: false }
+          );
+        })
+        .catch(() => setError('Failed to load products'))
+        .finally(() => setIsLoading(false));
+    }
+  }, []);
 
   const loadMore = useCallback(async () => {
     if (isLoading || !metaRef.current.hasMore) return;
 
     setIsLoading(true);
     try {
-      const sp = new URLSearchParams(paramsStr);
-      const params: Record<string, any> = {
-        page: metaRef.current.page + 1,
-        limit: metaRef.current.limit,
-      };
-
-      if (sp.get('search')) params.search = sp.get('search');
-      if (sp.get('category')) params.category = sp.get('category');
-      if (sp.get('minPrice')) params.minPrice = sp.get('minPrice');
-      if (sp.get('maxPrice')) params.maxPrice = sp.get('maxPrice');
-      if (sp.get('sort')) params.sort = sp.get('sort');
-
-      const result = await productApi.getProducts(params);
+      const result = await productApi.getProducts(
+        buildParams(metaRef.current.page + 1)
+      );
       setProducts((prev) => [...prev, ...result.data]);
 
       setMeta((prev) => ({
@@ -72,7 +112,7 @@ export default function InfiniteProducts({
     } finally {
       setIsLoading(false);
     }
-  }, [paramsStr, isLoading]);
+  }, [buildParams, isLoading]);
 
   const { sentinelRef } = useInfiniteScroll(loadMore);
 
@@ -109,7 +149,7 @@ export default function InfiniteProducts({
       <ProductGrid products={products} />
 
       {meta.hasMore && (
-        <div ref={sentinelRef} className="mt-8 flex justify-center">
+        <div ref={sentinelRef} className="mt-8 flex justify-center min-h-[1px]">
           {isLoading && <Loader />}
         </div>
       )}

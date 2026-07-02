@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Container from '@/components/layout/Container';
-import { ArrowRight, Shield, Clock, RefreshCw, ShoppingBag, Sparkles, Zap, ChevronRight } from 'lucide-react';
+import { ArrowRight, Shield, RefreshCw, ShoppingBag, Sparkles, Zap, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
 export default function HomePage() {

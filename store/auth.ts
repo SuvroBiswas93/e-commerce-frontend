@@ -5,6 +5,16 @@ import { persist } from 'zustand/middleware';
 import type { User, AuthState } from '@/types/index';
 import { authApi } from '@/lib/api';
 
+// Sync token to cookie so SSR can read it
+function setAuthCookie(token: string | null): void {
+  if (typeof window === 'undefined') return;
+  if (token) {
+    document.cookie = `authToken=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+  } else {
+    document.cookie = 'authToken=; path=/; max-age=0';
+  }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -22,14 +32,14 @@ export const useAuthStore = create<AuthState>()(
               : null;
           if (token) {
             set({ token });
-            // Verify token by fetching current user
             const user = await authApi.getCurrentUser();
             set({ user, isAuthenticated: true, token });
+            setAuthCookie(token);
           }
         } catch (error) {
-          // Token is invalid or expired
           if (typeof window !== 'undefined') {
             localStorage.removeItem('authToken');
+            document.cookie = 'authToken=; path=/; max-age=0';
           }
           set({ user: null, token: null, isAuthenticated: false });
         }
@@ -46,6 +56,7 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             error: null,
           });
+          setAuthCookie(token);
         } catch (error) {
           const message =
             error instanceof Error ? error.message : 'Login failed';
@@ -65,6 +76,7 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             error: null,
           });
+          setAuthCookie(token);
         } catch (error) {
           const message =
             error instanceof Error ? error.message : 'Registration failed';
@@ -75,6 +87,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         authApi.logout();
+        setAuthCookie(null);
         set({
           user: null,
           token: null,
@@ -89,6 +102,13 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
+      onRehydrateStorage: () => {
+        return (state) => {
+          if (state?.token) {
+            setAuthCookie(state.token);
+          }
+        };
+      },
       partialize: (state) => ({
         token: state.token,
         user: state.user,
