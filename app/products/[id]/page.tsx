@@ -7,10 +7,19 @@ import ProductInfo from '@/components/product/ProductInfo';
 import { productApi } from '@/lib/api';
 import { ChevronRight, Home, ArrowLeft } from 'lucide-react';
 
-export const revalidate = 3600;
-
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateStaticParams() {
+  try {
+    const result = await productApi.getProducts({ limit: 200 });
+    return result.data.map((product) => ({
+      id: String(product.id),
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {

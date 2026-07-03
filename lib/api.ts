@@ -12,13 +12,23 @@ export function setServerToken(token: string | null): void {
 // Get token from localStorage (client-side) or injected server token (SSR)
 function getToken(): string | null {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken');
+    if (token) return token;
+    // Fallback: read from Zustand persisted store (auth-storage key)
+    try {
+      const raw = localStorage.getItem('auth-storage');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed?.state?.token ?? null;
+    } catch {
+      return null;
+    }
   }
   return __serverToken;
 }
 
 // Set token in localStorage
-function setToken(token: string): void {
+export function setToken(token: string): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem('authToken', token);
 }

@@ -35,8 +35,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   };
   if (sp.search) params.search = String(sp.search);
   if (sp.category) params.category = String(sp.category);
-  if (sp.minPrice) params.minPrice = String(sp.minPrice);
-  if (sp.maxPrice) params.maxPrice = String(sp.maxPrice);
+  if (sp.minPrice && sp.maxPrice && Number(sp.minPrice) <= Number(sp.maxPrice)) {
+    params.minPrice = String(sp.minPrice);
+    params.maxPrice = String(sp.maxPrice);
+  }
   if (sp.sort) params.sort = String(sp.sort);
 
   let products: any[] = [];
@@ -56,6 +58,12 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   } catch {
     error = true;
   }
+
+  const qs = new URLSearchParams();
+  Object.entries(sp).forEach(([k, v]) => {
+    if (v) qs.set(k, String(v));
+  });
+  const filterKey = qs.toString() || 'no-filters';
 
   return (
     <Container className="py-8 max-md:py-5">
@@ -83,6 +91,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               </div>
             ) : (
               <InfiniteProducts
+                key={filterKey}
                 initialProducts={products}
                 initialMeta={meta}
               />

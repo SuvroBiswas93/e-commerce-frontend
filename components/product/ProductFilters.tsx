@@ -2,8 +2,9 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Category, SortOption } from '@/types/index';
-import { useEffect, useState } from 'react';
-import { Check, ChevronDown, SlidersHorizontal, X, ArrowUpDown } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { Check, ChevronDown, SlidersHorizontal, X, ArrowUpDown, Search } from 'lucide-react';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface ProductFiltersProps {
   categories: Category[];
@@ -18,16 +19,26 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
   const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
   const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
   const [sort, setSort] = useState(searchParams.get('sort') || '');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const [isOpen, setIsOpen] = useState(false);
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
+
+  const hasMounted = useRef(false);
 
   const visibleCategories = showAllCategories
     ? categories
     : categories.slice(0, 5);
 
   useEffect(() => {
+    if (hasMounted.current) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      hasMounted.current = true;
+    }
     const params = new URLSearchParams();
+    if (debouncedSearch) params.set('search', debouncedSearch);
     if (selectedCategory) params.set('category', selectedCategory);
     if (minPrice) params.set('minPrice', minPrice);
     if (maxPrice) params.set('maxPrice', maxPrice);
@@ -35,19 +46,18 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
     params.set('page', '1');
     const queryString = params.toString();
     router.push(queryString ? `/products?${queryString}` : '/products', { scroll: false });
-  }, [selectedCategory, minPrice, maxPrice, sort, router]);
+  }, [selectedCategory, minPrice, maxPrice, sort, debouncedSearch, router]);
 
   const handleClearFilters = () => {
     setSelectedCategory('');
     setMinPrice('');
     setMaxPrice('');
     setSort('');
-    router.push('/products', { scroll: false });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setSearchQuery('');
   };
 
-  const hasFilters = selectedCategory || minPrice || maxPrice;
-  const filterCount = [selectedCategory, minPrice, maxPrice].filter(Boolean).length;
+  const hasFilters = selectedCategory || minPrice || maxPrice || searchQuery;
+  const filterCount = [selectedCategory, minPrice, maxPrice, searchQuery].filter(Boolean).length;
 
   const handleCategoryChange = (categorySlug: string) => {
     setSelectedCategory(categorySlug);
@@ -128,6 +138,32 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
             </span>
           )}
         </div>
+
+        {/* Search */}
+        <section>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+            Search
+          </h3>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-xl border border-border bg-muted/30 pl-9 pr-8 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 transition-all focus:border-foreground/30 focus:bg-background focus:outline-none focus:ring-2 focus:ring-foreground/5"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground transition-colors cursor-pointer"
+                aria-label="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </section>
 
         {/* Category */}
         <section className="rounded-xl bg-muted/50 p-3 ring-1 ring-border">
@@ -251,7 +287,7 @@ export default function ProductFilters({ categories }: ProductFiltersProps) {
         {hasFilters && (
           <button
             onClick={handleClearFilters}
-            className="w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition-all hover:bg-foreground hover:text-background"
+            className="w-full rounded-xl border border-foreground/20 bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition-all hover:bg-blue-600 hover:text-background"
           >
             Clear All Filters
           </button>

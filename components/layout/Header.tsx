@@ -3,34 +3,16 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
-import { ShoppingCart, LogOut, LogIn, User, Menu, X, Store, Search } from 'lucide-react';
+import { ShoppingCart, LogOut, LogIn, User, Menu, X, Store } from 'lucide-react';
 import Container from './Container';
 import CartBadge from './CartBadge';
-import { useState, useEffect, useRef } from 'react';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useState, useEffect } from 'react';
 
 export default function Header() {
   const router = useRouter();
   const { user, isAuthenticated, logout, initialize } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearch = useDebounce(searchQuery, 300);
-  const hasInteracted = useRef(false);
-
-  useEffect(() => {
-    if (searchQuery) {
-      hasInteracted.current = true;
-    }
-  }, [searchQuery]);
-
-  useEffect(() => {
-    if (debouncedSearch.trim()) {
-      router.push(`/products?search=${encodeURIComponent(debouncedSearch.trim())}`);
-    } else if (debouncedSearch === '' && hasInteracted.current) {
-      router.push('/products');
-    }
-  }, [debouncedSearch, router]);
 
   useEffect(() => {
     initialize();
@@ -101,42 +83,31 @@ export default function Header() {
           <span className="hidden sm:inline">ShopHub</span>
         </Link>
 
-        {/* Search - always visible */}
-        <div className="flex-1 max-w-md max-sm:max-w-none">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60 pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-border/60 bg-muted/30 pl-9 pr-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/40 transition-all focus:border-foreground/30 focus:bg-background focus:outline-none focus:ring-2 focus:ring-foreground/5"
-            />
+        {/* Right section */}
+        <div className="flex items-center gap-1">
+          {/* Desktop auth */}
+          <div className="hidden md:flex items-center gap-2">
+            {authSection(false)}
           </div>
+
+          {/* Cart - always visible */}
+          <Link
+            href="/cart"
+            className="relative flex items-center p-2 text-foreground/70 no-underline rounded-lg hover:text-foreground hover:bg-muted/80 transition-all shrink-0"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            <CartBadge />
+          </Link>
+
+          {/* Mobile menu toggle */}
+          <button
+            className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-muted/50 text-foreground hover:bg-muted transition-colors shrink-0"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
-
-        {/* Desktop auth */}
-        <div className="hidden md:flex items-center gap-2 shrink-0">
-          {authSection(false)}
-        </div>
-
-        {/* Cart - always visible */}
-        <Link
-          href="/cart"
-          className="relative flex items-center p-2 text-foreground/70 no-underline rounded-lg hover:text-foreground hover:bg-muted/80 transition-all shrink-0"
-        >
-          <ShoppingCart className="w-5 h-5" />
-          <CartBadge />
-        </Link>
-
-        {/* Mobile menu toggle */}
-        <button
-          className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-muted/50 text-foreground hover:bg-muted transition-colors shrink-0"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
       </Container>
 
       {/* Mobile menu dropdown */}

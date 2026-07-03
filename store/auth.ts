@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, AuthState } from '@/types/index';
-import { authApi } from '@/lib/api';
+import { authApi, setToken } from '@/lib/api';
 
 // Sync token to cookie so SSR can read it
 function setAuthCookie(token: string | null): void {
@@ -34,11 +34,13 @@ export const useAuthStore = create<AuthState>()(
             set({ token });
             const user = await authApi.getCurrentUser();
             set({ user, isAuthenticated: true, token });
+            setToken(token);
             setAuthCookie(token);
           }
         } catch (error) {
           if (typeof window !== 'undefined') {
             localStorage.removeItem('authToken');
+            localStorage.removeItem('auth-storage');
             document.cookie = 'authToken=; path=/; max-age=0';
           }
           set({ user: null, token: null, isAuthenticated: false });
@@ -105,6 +107,7 @@ export const useAuthStore = create<AuthState>()(
       onRehydrateStorage: () => {
         return (state) => {
           if (state?.token) {
+            setToken(state.token);
             setAuthCookie(state.token);
           }
         };

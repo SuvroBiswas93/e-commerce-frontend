@@ -27,13 +27,20 @@ export default function InfiniteProducts({
 }: InfiniteProductsProps) {
   const searchParams = useSearchParams();
   const paramsStr = searchParams.toString();
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState(() => {
+    const seen = new Set<string>();
+    return initialProducts.filter((p) => {
+      if (seen.has(p.id)) return false;
+      seen.add(p.id);
+      return true;
+    });
+  });
   const [meta, setMeta] = useState(initialMeta);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const metaRef = useRef(meta);
   metaRef.current = meta;
-  const isFirstRender = useRef(true);
+  const isLoadingRef = useRef(false);
 
   const buildParams = useCallback(
     (page: number) => {
@@ -44,62 +51,73 @@ export default function InfiniteProducts({
       };
       if (sp.get('search')) params.search = sp.get('search');
       if (sp.get('category')) params.category = sp.get('category');
-      if (sp.get('minPrice')) params.minPrice = sp.get('minPrice');
-      if (sp.get('maxPrice')) params.maxPrice = sp.get('maxPrice');
+      const minP = sp.get('minPrice');
+      const maxP = sp.get('maxPrice');
+      if (minP && maxP && Number(minP) <= Number(maxP)) {
+        params.minPrice = minP;
+        params.maxPrice = maxP;
+      }
       if (sp.get('sort')) params.sort = sp.get('sort');
       return params;
     },
     [paramsStr]
   );
 
-  // Fetch products when URL params change on client navigation
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-
-    setIsLoading(true);
-    setError('');
-
-    productApi
-      .getProducts(buildParams(1))
-      .then((result) => {
-        setProducts(result.data);
-        setMeta(
-          result.meta || { page: 1, limit: 12, total: 0, hasMore: false }
-        );
-      })
-      .catch(() => setError('Failed to load products'))
-      .finally(() => setIsLoading(false));
-  }, [paramsStr, buildParams]);
+  const buildParamsRef = useRef(buildParams);
+  buildParamsRef.current = buildParams;
 
   // Fetch initial data on mount if SSR didn't provide it
   useEffect(() => {
     if (initialProducts.length === 0) {
+      let cancelled = false;
       setIsLoading(true);
       productApi
         .getProducts(buildParams(1))
         .then((result) => {
-          setProducts(result.data);
+          if (cancelled) return;
+          const seen = new Set<string>();
+          setProducts(result.data.filter((p) => {
+            if (seen.has(p.id)) return false;
+            seen.add(p.id);
+            return true;
+          }));
           setMeta(
             result.meta || { page: 1, limit: 12, total: 0, hasMore: false }
           );
         })
-        .catch(() => setError('Failed to load products'))
-        .finally(() => setIsLoading(false));
+        .catch(() => {
+          if (cancelled) return;
+          setError('Failed to load products');
+        })
+        .finally(() => {
+          if (cancelled) return;
+          setIsLoading(false);
+        });
+
+      return () => {
+        cancelled = true;
+      };
     }
   }, []);
 
   const loadMore = useCallback(async () => {
-    if (isLoading || !metaRef.current.hasMore) return;
-
+    if (isLoadingRef.current || !metaRef.current.hasMore) return;
+    isLoadingRef.current = true;
     setIsLoading(true);
     try {
       const result = await productApi.getProducts(
-        buildParams(metaRef.current.page + 1)
+        buildParamsRef.current(metaRef.current.page + 1)
       );
-      setProducts((prev) => [...prev, ...result.data]);
+      setProducts((prev) => {
+        const existingIds = new Set(prev.map((p) => p.id));
+        const seen = new Set<string>();
+        const fresh = result.data.filter((p) => {
+          if (existingIds.has(p.id) || seen.has(p.id)) return false;
+          seen.add(p.id);
+          return true;
+        });
+        return [...prev, ...fresh];
+      });
 
       setMeta((prev) => ({
         ...prev,
@@ -110,9 +128,10 @@ export default function InfiniteProducts({
       setError('Failed to load more products');
       console.error(err);
     } finally {
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }, [buildParams, isLoading]);
+  }, []);
 
   const { sentinelRef } = useInfiniteScroll(loadMore);
 
