@@ -10,6 +10,7 @@ A full stack e-commerce frontend built with Next.js 16 App Router, Tailwind CSS 
 - **State Management:** [Zustand v5](https://zustand-demo.pmnd.rs/) + `persist` middleware
 - **UI Primitives:** [@base-ui/react](https://base-ui.com/)
 - **Icons:** [Lucide React](https://lucide.dev/)
+- **Form Handling:** [React Hook Form](https://react-hook-form.com/)
 - **Tooling:** ESLint, Prettier, pnpm
 
 ## 📁 Project Structure
@@ -119,6 +120,9 @@ A full stack e-commerce frontend built with Next.js 16 App Router, Tailwind CSS 
 
 ### Authentication
 - JWT-based login/register with localStorage token
+- Login and Register forms use **React Hook Form** with field-level validation rules (required, email pattern, password min-length, confirm match)
+- API errors surface via `setError('root')` and display in an inline banner
+- Form submission uses `isSubmitting` for loading state and input disabling
 - Token synced to cookie (`setAuthCookie`) for SSR access
 - **Edge proxy** (`proxy.ts`) validates token with `GET /api/auth/me` before protected routes
 - Invalid/expired tokens are cleared from both localStorage and cookie, with redirect to login

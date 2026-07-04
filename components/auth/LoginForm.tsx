@@ -3,38 +3,41 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
 import { useAuthStore } from '@/store/auth';
 import Loader from '@/components/common/Loader';
 import { Store, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
+interface LoginFormFields {
+  email: string;
+  password: string;
+}
+
 export default function LoginForm() {
   const router = useRouter();
-  const { login, isLoading, error, clearError } = useAuthStore();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [localError, setLocalError] = useState('');
+  const { login } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLocalError('');
-    clearError();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+    clearErrors,
+  } = useForm<LoginFormFields>();
 
-    if (!email || !password) {
-      setLocalError('Please fill in all fields');
-      return;
-    }
-
+  const onSubmit = async (data: LoginFormFields) => {
+    clearErrors('root');
     try {
-      await login(email, password);
+      await login(data.email, data.password);
       router.push('/products');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
-      setLocalError(message);
+      setError('root', { message });
     }
   };
 
-  const displayError = localError || error;
+  const displayError = errors.root?.message;
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -64,7 +67,7 @@ export default function LoginForm() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-1.5">
               <label htmlFor="email" className="text-sm font-medium text-foreground/80">
                 Email Address
@@ -76,15 +79,22 @@ export default function LoginForm() {
                 <input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
+                  placeholder="name@example.com"
+                  {...register('email', {
+                    required: 'Email is required',
+                    pattern: {
+                      value: /^\S+@\S+$/i,
+                      message: 'Invalid email address',
+                    },
+                  })}
+                  disabled={isSubmitting}
                   className="w-full pl-10 pr-4 py-3 bg-background border border-border/60 rounded-xl text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all disabled:opacity-50"
                   autoComplete="email"
-                  required
                 />
               </div>
+              {errors.email && (
+                <p className="text-destructive text-xs mt-1.5">{errors.email.message}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -99,12 +109,12 @@ export default function LoginForm() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoading}
+                  {...register('password', {
+                    required: 'Password is required',
+                  })}
+                  disabled={isSubmitting}
                   className="w-full pl-10 pr-10 py-3 bg-background border border-border/60 rounded-xl text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all disabled:opacity-50"
                   autoComplete="current-password"
-                  required
                 />
                 <button
                   type="button"
@@ -116,14 +126,17 @@ export default function LoginForm() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-destructive text-xs mt-1.5">{errors.password.message}</p>
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="w-full py-3 px-4 bg-linear-to-r from-primary to-primary/90 text-primary-foreground border-none rounded-xl text-sm font-semibold cursor-pointer hover:from-primary/90 hover:to-primary hover:shadow-lg hover:shadow-primary/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none flex items-center justify-center gap-2 min-h-12 mt-2"
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <>
                   <Loader size="sm" />
                   <span>Signing in...</span>

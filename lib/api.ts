@@ -130,7 +130,7 @@ export const authApi = {
   },
 };
 
-// ── Product API calls ─────────────────────────────────────────────
+// Product API calls 
 export const productApi = {
   getProducts: async (params: Record<string, any> = {}) => {
     const queryParams = new URLSearchParams();
