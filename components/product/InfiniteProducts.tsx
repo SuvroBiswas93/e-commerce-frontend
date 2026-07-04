@@ -105,8 +105,9 @@ export default function InfiniteProducts({
     isLoadingRef.current = true;
     setIsLoading(true);
     try {
+      const nextPage = metaRef.current.page + 1;
       const result = await productApi.getProducts(
-        buildParamsRef.current(metaRef.current.page + 1)
+        buildParamsRef.current(nextPage)
       );
       setProducts((prev) => {
         const existingIds = new Set(prev.map((p) => p.id));
@@ -121,9 +122,13 @@ export default function InfiniteProducts({
 
       setMeta((prev) => ({
         ...prev,
-        page: prev.page + 1,
+        page: nextPage,
         hasMore: result.meta?.hasMore ?? false,
       }));
+
+      const sp = new URLSearchParams(window.location.search);
+      sp.set('page', String(nextPage));
+      window.history.replaceState(null, '', `/products?${sp.toString()}`);
     } catch (err) {
       setError('Failed to load more products');
       console.error(err);

@@ -60,8 +60,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   }
 
   const qs = new URLSearchParams();
-  Object.entries(sp).forEach(([k, v]) => {
-    if (v) qs.set(k, String(v));
+  Object.entries(sp).forEach(([key, value]) => {
+    if (value) qs.set(key, String(value));
   });
   const filterKey = qs.toString() || 'no-filters';
 
